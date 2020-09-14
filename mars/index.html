@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mars</title>
+    <script src="js/vframeplayer3.min.js"></script>
+    <style>
+        #marsWrap {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #000;
+        }
+
+        #mars {
+            width: 1000px;
+            height: 1000px;
+            transform: translateY(0);
+            transition: all 0.5s;
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            margin: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="marsWrap">
+        <div id="mars"></div>
+    </div>
+    <script>
+        const imgArr = []
+        const loadImage = (imgUrl) => {
+            let image = new Image()
+            image.src = imgUrl
+            imgArr.push(image)
+        }
+
+        for (let i = 0; i < 33; i++) {
+            loadImage(`images/${i}.jpg`)
+        }
+        for (let i = 33; i < 81; i++) {
+            loadImage(`images/${i}.png`)
+        }
+
+        const framePlayer = new vFramePlayer({
+            dom: mars,
+            imgArr: imgArr,
+            fps: 60
+        })
+
+        framePlayer.goto(framePlayer.get("startFrame"))
+
+        var scrollIndex = 0,
+            newScrollIndex = 0,
+            isPlay = true;
+        document.addEventListener('mousewheel', (e) => {
+            console.log(e)
+            if (isPlay) {
+                var isDown = e.deltaY > 0
+                if (isDown && (scrollIndex < 80)) {
+                    newScrollIndex = (newScrollIndex + 18 > 80) ? 80 : newScrollIndex + 18
+                }
+                if (!isDown && (scrollIndex > 0)) {
+                    newScrollIndex = (newScrollIndex - 18 < 0) ? 0 : newScrollIndex - 18
+                }
+                if (scrollIndex !== newScrollIndex) {
+                    framePlayer.play(scrollIndex, newScrollIndex)
+                    scrollIndex = newScrollIndex
+                    isPlay = false
+                    transformMars(scrollIndex)
+                }
+            }
+        })
+
+        framePlayer.on('stop', () => {
+            console.log('stop')
+            isPlay = true
+        })
+
+        const transformMars = (scrollIndex)=>{
+            let ratio = (80-scrollIndex)/80
+            mars.style.width=mars.style.height=300+ratio*700+'px'
+            mars.style.transform=`translateY(-${250*(1-ratio)}px)`
+        }
+    </script>
+</body>
+
+</html>
